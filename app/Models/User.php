@@ -25,13 +25,12 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     protected $fillable = [
         'nome',
-        'nome_guerra',
-        'cpf',
+        'matricula',
+        'telefone',
+        'email',
         'tipo',
         'reset',
-        'secao_id',
         'password',
-        'posto_grad_id'
     ];
 
     protected $appends = ['firstName'];
@@ -45,28 +44,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'password',
     ];
 
-
-    public function secao()
-    {
-        return $this->belongsTo( Secao::class);
-    }
-
-    public function telas()
-    {
-        return $this->hasMany( Tela::class);
-    }
-
-    public function posto_grad()
-    {
-        return $this->belongsTo( PostoGrad::class);
-    }
-
     public function getFirstNameAttribute()
     {
         return
             explode(" ", $this->nome)[0];
     }
 
+    // usuarios podem ter várias unidades
+    // criar UserUnidade para pivotear
 
 }
 

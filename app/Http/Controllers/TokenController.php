@@ -16,23 +16,23 @@ class TokenController extends Controller
 
         // valida os dados
         $this->validate($request,[
-            'cpf'=> 'required',
+            'matricula'=> 'required',
             'password'=>'required'
         ]);
 
-        $user = User::where('cpf', $request['cpf'])->first()->load('secao', 'posto_grad');
+        $user = User::where('matricula', $request['matricula'])->first();
 
         // caso senha errada
         if (is_null($user) || !Hash::check($request->password, $user->password)) {
 
-           return response()->json('Usuário ou senha inválidos', 401);
+           return response()->json('Matricula ou senha inválidas', 401);
 
         }
 
         // payload
         $payload = [
             'iss' => "lumen-jwt", // Issuer of the token
-            'cpf' => $user->cpf, // Subject of the token
+            'matricula' => $user->matricula, // Subject of the token
             'iat' => time(), // Time when JWT was issued.
             //'exp' => time() + 60 * 60 * 60 * 24 // Expiration time
             'exp' => time() + 43200 // Expiration time (12 horas)

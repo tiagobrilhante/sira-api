@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTablePostoGrads extends Migration
+class CreateTableTurnos extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,14 @@ class CreateTablePostoGrads extends Migration
      */
     public function up()
     {
-        Schema::create('posto_grads', function (Blueprint $table) {
+        Schema::create('turnos', function (Blueprint $table) {
             $table->id();
-            $table->string('pg');
-            $table->integer('antiguidade');
+            $table->string('horario');
+            $table->string('identificador_horario');
+            $table->bigInteger('turma_id')->unsigned()->index();
+            $table->foreign('turma_id')
+                ->references('id')
+                ->on('turnos')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +33,6 @@ class CreateTablePostoGrads extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('posto_grads');
+        Schema::dropIfExists('turmas');
     }
 }

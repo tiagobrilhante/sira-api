@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableIndicadorValors extends Migration
+class CreateTableCursos extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,15 @@ class CreateTableIndicadorValors extends Migration
      */
     public function up()
     {
-
-        Schema::create('indicador_valors', function (Blueprint $table) {
+        Schema::create('cursos', function (Blueprint $table) {
             $table->id();
-            $table->integer('valor')->nullable();
-            $table->integer('mes');
-            $table->integer('ano');
-            $table->bigInteger('indicador_id')->unsigned()->index();
-            $table->foreign('indicador_id')
+            $table->string('nome');
+            $table->string('codigo');
+            $table->integer('qtd_periodos_possiveis');
+            $table->bigInteger('unidade_id')->unsigned()->index();
+            $table->foreign('unidade_id')
                 ->references('id')
-                ->on('indicadors');
+                ->on('unidades')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -35,6 +34,6 @@ class CreateTableIndicadorValors extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('indicador_valors');
+        Schema::dropIfExists('cursos');
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddValorFloatToIndicadorValorsTable extends Migration
+class CreateTableUnidades extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class AddValorFloatToIndicadorValorsTable extends Migration
      */
     public function up()
     {
-        Schema::table('indicador_valors', function (Blueprint $table) {
-            $table->float('valor_float')->after('valor')->nullable()->default(null);
+        Schema::create('unidades', function (Blueprint $table) {
+            $table->id();
+            $table->string('nome');
+            $table->string('prefixo');
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -25,8 +29,6 @@ class AddValorFloatToIndicadorValorsTable extends Migration
      */
     public function down()
     {
-        Schema::table('indicador_valors', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('unidades');
     }
 }
