@@ -15,12 +15,12 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
          $this->call([
-             SecaoSeeder::class,
-             PostoGradSeeder::class,
+             UnidadeSeeder::class,
+             CursoSeeder::class,
+             SemestreLetivoSeeder::class,
+             TurnoParametroSeeder::class,
+             TurnoSeeder::class,
              UserSeeder::class,
-             CategoriaSeeder::class,
-             IndicadorSeeder::class,
-             IndicadorValorSeeder::class,
          ]);
     }
 }

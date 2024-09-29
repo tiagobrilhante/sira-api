@@ -18,8 +18,13 @@ class Curso extends Model
         return $this->belongsTo( Unidade::class);
     }
 
-    public function turmas()
+    public function semestresLetivos()
     {
-        return $this->hasMany( Turma::class);
+        return $this->hasMany( SemestreLetivo::class);
+    }
+
+    public function userCurso()
+    {
+        return $this->hasMany( UserCurso::class, 'curso_id', 'id');
     }
 }

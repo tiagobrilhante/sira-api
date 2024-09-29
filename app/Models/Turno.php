@@ -9,12 +9,17 @@ class Turno extends Model
 {
     use SoftDeletes;
 
-    protected $fillable =['nome', 'codigo_identificador', 'turma_id'];
+    protected $fillable =['turno_parametro_id', 'semestre_letivo_id', 'qtd_turmas'];
 
     // usuarios podem ter várias unidades
     // vai precisar de um objeto associativo separado
-    public function turma()
+    public function semestreLetivo()
     {
-        return $this->belongsTo( Curso::class);
+        return $this->belongsTo( SemestreLetivo::class);
+    }
+
+    public function turnoParametro()
+    {
+        return $this->belongsTo( TurnoParametro::class);
     }
 }

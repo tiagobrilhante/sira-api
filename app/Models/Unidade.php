@@ -17,4 +17,21 @@ class Unidade extends Model
     {
         return $this->hasMany( Curso::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($unidade) {
+            $unidade->cursos->each(function ($curso) {
+                // Para cada curso, acessar os semestres letivos
+                $curso->semestresLetivos->each(function ($semestre) {
+                    // Para cada semestre letivo, apagar os turnos relacionados
+                    $semestre->turnos()->delete(); // Apaga todos os turnos do semestre letivo
+                    $semestre->delete(); // Apaga o semestre letivo
+                });
+                $curso->delete(); // Apaga o curso
+            });
+        });
+    }
 }

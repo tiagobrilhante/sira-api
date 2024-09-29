@@ -10,11 +10,12 @@
     "type": "project",
     "require": {
         "php": "^8.0",
+        "ext-json": "*",
+        "ext-mysqli": "*",
         "firebase/php-jwt": "^5.5.1",
         "laravel/lumen-framework": "^8.0",
-        "nordsoftware/lumen-cors": "^3.4",
-        "ext-json": "*",
-      "ext-mysqli": "*"
+        "nesbot/carbon": "^2.72",
+        "nordsoftware/lumen-cors": "^3.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

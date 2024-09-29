@@ -45,7 +45,7 @@ class AuthServiceProvider extends ServiceProvider
             $dadosAutenticacao = JWT::decode($token, env('JWT_KEY'), ['HS256']);
 
 
-            return User::where('cpf', $dadosAutenticacao->cpf)->first()->load('secao', 'posto_grad');
+            return User::where('matricula', $dadosAutenticacao->matricula)->first();
 
 
         });

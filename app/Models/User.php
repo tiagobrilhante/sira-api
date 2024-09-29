@@ -50,8 +50,12 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             explode(" ", $this->nome)[0];
     }
 
-    // usuarios podem ter várias unidades
-    // criar UserUnidade para pivotear
+
+    public function cursos()
+    {
+        return $this->hasMany( UserCurso::class, 'user_id', 'id');
+    }
+
 
 }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserCurso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,31 +15,25 @@ class UserController extends Controller
     //lista os usuários
     public function index()
     {
-        return User::all()->load('secao', 'posto_grad');
+        return User::all();
     }
 
-    // retorna se o usuário pode ou não usar o cpf ao se cadastrar / editar
-    // retorna se o usuário pode ou não usar o cpf ao se cadastrar / editar
-    public function cpfExist(Request $request)
+    //lista os usuários para administracão
+    public function indexAdm()
+    {
+        return User::where('tipo', '!=', 'Aluno')->get()->load('cursos.curso');
+    }
+
+    // retorna se o usuário pode ou não usar a matricula ao se cadastrar / editar
+    public function matriculaExist(Request $request)
     {
         $id_usuario = $request['id'];
         if ($id_usuario === null) {
-            $teste = User::where('cpf', $request['cpf'])->count();
+            $teste = User::where('matricula', $request['matricula'])->count();
         } else {
-            $teste = User::where('cpf', $request['cpf'])->where('id', '!=', $id_usuario)->count();
+            $teste = User::where('matricula', $request['matricula'])->where('id', '!=', $id_usuario)->count();
         }
         return $teste;
-    }
-
-    //limpa os . e - de um cpf para resetar senha
-    function limpaCPF_CNPJ($valor)
-    {
-        $valor = trim($valor);
-        $valor = str_replace(".", "", $valor);
-        $valor = str_replace(",", "", $valor);
-        $valor = str_replace("-", "", $valor);
-        $valor = str_replace("/", "", $valor);
-        return $valor;
     }
 
     // altera a senha de um usuário resetado
@@ -50,15 +45,15 @@ class UserController extends Controller
         $user->save();
     }
 
-    // reseta a senha de um usuário
+    // reseta a senha de um usuário TEM QUE ARRUMAR
     public function resetaSenha(Request $request)
     {
         $user = User::find($request['id']);
-        $user->password = Hash::make($this->limpaCPF_CNPJ($user->cpf));
+        $user->password = Hash::make($user->matricula);
         $user->reset = 1;
         $user->save();
 
-        return $user->load('secao', 'posto_grad');
+        return $user->load('cursos');
     }
 
     // altera a senha de um usuário normal
@@ -73,42 +68,67 @@ class UserController extends Controller
     public function createUser(Request $request)
     {
         $user = User::create([
-            'cpf' => $request['cpf'],
             'nome' => $request['nome'],
-            'nome_guerra' => $request['nome_guerra'],
+            'matricula' => $request['matricula'],
+            'telefone' => $request['telefone'],
+            'email' => $request['email'],
             'tipo' => $request['tipo'],
-            'secao_id' => $request['secao_id'],
-            'posto_grad_id' => $request['posto_grad_id'],
-            'password' => Hash::make($this->limpaCPF_CNPJ($request['cpf'])),
-            'reset' => 1
+            'reset' => 1,
+            'password' => Hash::make($request['matricula'])
         ]);
 
-        return $user->load('secao', 'posto_grad');
+        if ($request['tipo'] === 'Administrador' && is_array($request['cursos'])) {
+            // Recebe um array de IDs de cursos
+            foreach ($request['cursos'] as $cursoId) {
+                UserCurso::create([
+                    'curso_id' => $cursoId,
+                    'user_id' => $user->id
+                ]);
+            }
+        }
+
+        return $user->load('cursos.cursos');
     }
 
     // altera um usuário
     public function update(int $id, Request $request)
     {
+        $user = User::find($id);
 
-        $usuario = User::find($id);
-
-        if (is_null($usuario)) {
+        if (is_null($user)) {
             return response()->json([
                 'erro' => 'Recurso não encontrado'
             ], 404);
-
         }
-        $usuario->fill($request->all());
-        $usuario->save();
-        return $usuario->load('secao', 'posto_grad');
 
+        $user->fill($request->only([
+            'nome', 'matricula', 'telefone', 'email', 'tipo', 'reset'
+        ]));
+
+        $user->save();
+
+        if ($request['tipo'] === 'Administrador' && is_array($request['cursos'])) {
+            // Sync the cursos relationship
+            $user->cursos()->delete();
+
+            foreach ($request['cursos'] as $cursoId) {
+                UserCurso::create([
+                    'curso_id' => $cursoId,
+                    'user_id' => $user->id
+                ]);
+            }
+        }
+
+        return $user->load('cursos.curso');
     }
 
     // remove um usuário
     public function destroy($id)
     {
 
-        $usuario = User::destroy($id);
+        $usuario = User::find($id);
+        $usuario->cursos()->delete();
+        $usuario->delete();
 
         if ($usuario === 0) {
 
@@ -122,23 +142,23 @@ class UserController extends Controller
 
     }
 
-    public function checaCPFExist(Request $request, $id)
+    public function checaMatriculaExist(Request $request, $id)
     {
 
         $mensagemRetorno = '';
         if ($id === 'undefined') {
-            // Busca por outro usuário com o mesmo CPF, excluindo o próprio usuário
-            $usuarioComMesmoCPF = User::where('cpf',$request['cpf'])->first();
+            // Busca por outro usuário com a mesma Matricula, excluindo o próprio usuário
+            $usuarioComMesmaMatricula = User::where('matricula', $request['matricula'])->first();
         } else {
             $meuUser = User::find($id);
-            // Busca por outro usuário com o mesmo CPF, excluindo o próprio usuário
-            $usuarioComMesmoCPF = User::where('cpf',$request['cpf'])
+            // Busca por outro usuário com a mesma Matricula, excluindo o próprio usuário
+            $usuarioComMesmaMatricula = User::where('matricula', $request['matricula'])
                 ->where('id', '<>', $id)
                 ->first();
         }
 
-        if ($usuarioComMesmoCPF) {
-            $mensagemRetorno = 'CPF já registrado por outro usuário.';
+        if ($usuarioComMesmaMatricula) {
+            $mensagemRetorno = 'Matrícula já registrada por outro usuário.';
         }
 
         return $mensagemRetorno;
@@ -157,6 +177,4 @@ class UserController extends Controller
             return 0;
         }
     }
-
-
 }
