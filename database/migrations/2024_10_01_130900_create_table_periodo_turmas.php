@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableTurnos extends Migration
+class CreateTablePeriodoTurmas extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,14 @@ class CreateTableTurnos extends Migration
      */
     public function up()
     {
-        Schema::create('turnos', function (Blueprint $table) {
+        Schema::create('periodo_turmas', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('turno_parametro_id')->unsigned()->index();
-            $table->foreign('turno_parametro_id')
+            $table->integer('periodo')->unsigned();
+            $table->bigInteger('turno_id')->unsigned()->index();
+            $table->foreign('turno_id')
                 ->references('id')
-                ->on('turno_parametros')->onDelete('cascade');
-            $table->bigInteger('semestre_letivo_id')->unsigned()->index();
-            $table->foreign('semestre_letivo_id')
-                ->references('id')
-                ->on('semestre_letivos')->onDelete('cascade');
+                ->on('turnos')->onDelete('cascade');
+            $table->integer('qtd_turmas_por_periodo')->unsigned();
             $table->timestamps();
             $table->softDeletes();
         });

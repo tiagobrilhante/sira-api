@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserAlunoVinculo;
 use App\Models\UserCurso;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -176,5 +178,30 @@ class UserController extends Controller
         } else {
             return 0;
         }
+    }
+
+    public function pesquisaMatricula(Request $request)
+    {
+        $user = User::where('matricula', $request['matricula'])->where('tipo', 'Aluno')->first();
+
+        // primeiro eu tenho que verificar se existe a matricula, e em seguida verificar se existe uma  vigência nos cursos que eu possuo
+
+        if ($user) {
+
+            $possuiVinculo = UserAlunoVinculo::where('user_id', $user->id)->where('semestre_letivo_id', 1)->count();
+
+            return $user->load('cursos.curso');
+        }
+
+        return 'Matrícula não encontrada.';
+
+    }
+    public function emVigencia()
+    {
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
+        $currentSemester = $currentMonth <= 6 ? 1 : 2;
+        // Retorna o ano com os dois últimos dígitos e o semestre
+        return substr($currentYear, 2) . '.' . $currentSemester;
     }
 }

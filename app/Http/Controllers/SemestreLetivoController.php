@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\PeriodoTurma;
 use App\Models\SemestreLetivo;
 use App\Models\Turno;
 use App\Models\TurnoParametro;
@@ -127,7 +128,7 @@ class SemestreLetivoController extends Controller
                     $turnoData = [
                         'horario' => $turno->turnoParametro->horario,
                         'identificador_horario' => $turno->turnoParametro->identificador_horario,
-                        'qtd_turmas' => $turno->qtd_turmas
+                        'periodo_turma' => $turno->periodoTurma
                     ];
 
                     // Adicionar o turno ao semestre
@@ -157,7 +158,7 @@ class SemestreLetivoController extends Controller
         $semestreLetivo = SemestreLetivo::find($id);
 
         if ($semestreLetivo) {
-            $semestreLetivo->load('turnos.turnoParametro');
+            $semestreLetivo->load('turnos.turnoParametro', 'turnos.periodoTurma');
         }
 
         return $semestreLetivo;
@@ -168,7 +169,7 @@ class SemestreLetivoController extends Controller
     public function habilitaTurma(Request $request)
     {
 
-       // return $request->all();
+        // return $request->all();
 
         // primeiro eu crio o semestre letivo do ano se não existir
 
@@ -177,6 +178,7 @@ class SemestreLetivoController extends Controller
         $curso = $request['curso'];
         $turno = $request['turno'];
         $vigencia = $request['vigencia'];
+        $turmas_por_periodo = $request['turmas_por_periodo'];
 
         $selectedCurso = Curso::find($curso['id']);
 
@@ -194,11 +196,26 @@ class SemestreLetivoController extends Controller
             $semestreLetivo = SemestreLetivo::where('codigo', $vigencia)->where('curso_id', $curso['id'])->first();
         }
 
-        $turno = Turno::create([
-            'turno_parametro_id' => $turno['id'],
-            'qtd_turmas' => $request['qtd_turmas'],
-            'semestre_letivo_id'=> $semestreLetivo->id
-        ]);
+        $verificaTurno = Turno::where('turno_parametro_id', $turno['id'])->where('semestre_letivo_id', $semestreLetivo->id)->count();
+
+        if ($verificaTurno === 0) {
+            $turno = Turno::create([
+                'turno_parametro_id' => $turno['id'],
+                //  'qtd_turmas' => $request['qtd_turmas'],
+                'semestre_letivo_id'=> $semestreLetivo->id
+            ]);
+        } else {
+            $turno = Turno::where('turno_parametro_id', $turno['id'])->where('semestre_letivo_id', $semestreLetivo->id)->first();
+        }
+
+
+        foreach ($turmas_por_periodo as $turma) {
+            $periodoTurma = PeriodoTurma::create([
+                'periodo' => $turma['periodo'],
+                'qtd_turmas_por_periodo' => $turma['qtd_turmas'],
+                'turno_id' => $turno->id
+            ]);
+        }
 
         return 'ok';
 

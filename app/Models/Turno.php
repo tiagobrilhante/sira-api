@@ -9,7 +9,7 @@ class Turno extends Model
 {
     use SoftDeletes;
 
-    protected $fillable =['turno_parametro_id', 'semestre_letivo_id', 'qtd_turmas'];
+    protected $fillable =['turno_parametro_id', 'semestre_letivo_id'];
 
     // usuarios podem ter várias unidades
     // vai precisar de um objeto associativo separado
@@ -21,5 +21,10 @@ class Turno extends Model
     public function turnoParametro()
     {
         return $this->belongsTo( TurnoParametro::class);
+    }
+
+    public function periodoTurma()
+    {
+        return $this->hasMany( PeriodoTurma::class);
     }
 }
