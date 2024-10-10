@@ -17,14 +17,12 @@ class CreateTableUserAlunoVinculo extends Migration
             $table->id();
 
             $table->bigInteger('user_id')->unsigned()->index();
+            $table->string('codigo_vinculo');
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')->onDelete('cascade');
 
-            $table->bigInteger('semestre_letivo_id')->unsigned()->index();
-            $table->foreign('semestre_letivo_id')
-                ->references('id')
-                ->on('semestre_letivos')->onDelete('cascade');
+            $table->string('semestre_letivo');
             $table->timestamps();
 
             $table->softDeletes();

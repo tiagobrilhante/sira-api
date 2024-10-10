@@ -24,6 +24,7 @@ $router->get('/', function () use ($router) {
 $router->post('/api/login', 'TokenController@gerarToken');
 $router->post('/api/pesquisamatricula', 'UserController@pesquisaMatricula');
 $router->get('/api/retornacursos', 'CursoController@pesquisaCursos');
+$router->post('/api/autocadastro', 'UserController@autoCadastro');
 
 
 // autenticado ...
@@ -80,5 +81,10 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
     $router->group(['prefix' => 'periodoturma'], function () use ($router) {
         $router->put('{id}', 'PeriodoTurmaController@update');
         $router->delete('{id}', 'PeriodoTurmaController@destroy');
+    });
+
+    // turma
+    $router->group(['prefix' => 'turma'], function () use ($router) {
+        $router->get('{codigo}', 'TurmaController@retornaObjetoCursoPeriodoTurnoTurma');
     });
 });

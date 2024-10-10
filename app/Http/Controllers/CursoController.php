@@ -82,9 +82,10 @@ class CursoController extends Controller
                 // Adicionar os turnos e turmas para o semestre letivo
                 foreach ($semestre->turnos as $turno) {
                     $turnoData = [
+                        'id' => $turno->id,
                         'horario' => $turno->turnoParametro->horario,
                         'identificador_horario' => $turno->turnoParametro->identificador_horario,
-                        'qtd_turmas' => $turno->qtd_turmas
+                        'periodo_turmas' => $turno->periodoTurma
                     ];
 
                     // Adicionar o turno ao semestre

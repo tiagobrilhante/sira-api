@@ -56,6 +56,11 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $this->hasMany( UserCurso::class, 'user_id', 'id');
     }
 
+    public function alunoVinculos()
+    {
+        return $this->hasMany( UserAlunoVinculo::class, 'user_id', 'id');
+    }
+
 
 }
 

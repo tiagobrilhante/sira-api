@@ -42,6 +42,10 @@ class TokenController extends Controller
 
        $token =  JWT::encode($payload, env('JWT_KEY'));
 
+       if ($user->tipo === 'Aluno') {
+           $user->load('alunoVinculos');
+       }
+
         return [
             'access_token'=>$token,
             'user'=> $user

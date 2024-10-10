@@ -188,14 +188,15 @@ class UserController extends Controller
 
         if ($user) {
 
-            $possuiVinculo = UserAlunoVinculo::where('user_id', $user->id)->where('semestre_letivo_id', 1)->count();
+            $possuiVinculo = UserAlunoVinculo::where('user_id', $user->id)->where('semestre_letivo', $this->emVigencia())->count();
 
-            return $user->load('cursos.curso');
+            return $user->load('alunoVinculos');
         }
 
         return 'Matrícula não encontrada.';
 
     }
+
     public function emVigencia()
     {
         $currentYear = Carbon::now()->year;
@@ -203,5 +204,69 @@ class UserController extends Controller
         $currentSemester = $currentMonth <= 6 ? 1 : 2;
         // Retorna o ano com os dois últimos dígitos e o semestre
         return substr($currentYear, 2) . '.' . $currentSemester;
+    }
+
+
+    // cria um novo usuário (ALUNO)
+    public function autoCadastro(Request $request)
+    {
+
+        $user = User::create([
+            'nome' => $request['nome'],
+            'matricula' => $request['matricula'],
+            'telefone' => $request['telefone'],
+            'email' => $request['email'],
+            'tipo' => 'Aluno',
+            'reset' => 0,
+            'password' => Hash::make($request['password'])
+        ]);
+
+        //estrutura Recebiada
+        /*
+         *
+         * cursos é array ->
+         * tem unidade em cursos
+         * tem turno em cursos que é objeto e tem periodo_turmas (que é array) que possui qtd_turmas_por_periodo
+         * tem periodo em cursos
+         *
+         */
+
+        // Recebe um array de IDs de cursos e faz o código vinculo
+        foreach ($request['cursos'] as $cursoId) {
+            UserAlunoVinculo::create([
+                'semestre_letivo' => $this->emVigencia(),
+                'codigo_vinculo' => $this->montaCodigo($cursoId),
+                'user_id' => $user->id
+            ]);
+        }
+
+        return $user;
+    }
+
+    private function montaCodigo($curso)
+    {
+
+        $codigoUnidade = $curso['unidade']['prefixo'];
+        $codigoCurso = $curso['codigo'];
+        $periodo = str_pad($curso['periodo'], 2, '0', STR_PAD_LEFT);
+        $turno = $curso['turno']['identificador_horario'];
+
+        $arrayLetras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','X','W','Y','Z'];
+
+        $turmaIndex = ($curso['turma'] ?? 1) - 1; // Default to 1 if 'turma' is not set
+        $letra = $arrayLetras[$turmaIndex] ?? 'A'; // Use 'A' if index is out of bounds
+
+
+        // base de exemplo
+        /*
+         * SPL (codigo da unidade) 079 (curso) 01 (turma unica - só pra constar) 07 (periodo)  NN (turno) A (turma)
+         */
+
+        // Spl 079 01 02 NM A
+
+
+        // Spl 079 01 06 NTA C
+        return $codigoUnidade . $codigoCurso . '01' . $periodo . $turno . $letra;
+
     }
 }

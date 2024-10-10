@@ -11,12 +11,8 @@ class UserAlunoVinculo extends Model
 
     protected $table = 'user_aluno_vinculo';
 
-    protected $fillable =['user_id','codigo_vinculo', 'semetre_letivo_id'];
+    protected $fillable =['user_id','codigo_vinculo', 'semestre_letivo'];
 
-    public function semestreLetivo()
-    {
-        return $this->belongsTo( SemestreLetivo::class, 'semestre_letivo_id', 'id');
-    }
     public function user()
     {
         return $this->belongsTo( User::class, 'user_id', 'id');
