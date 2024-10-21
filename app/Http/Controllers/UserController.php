@@ -269,4 +269,24 @@ class UserController extends Controller
         return $codigoUnidade . $codigoCurso . '01' . $periodo . $turno . $letra;
 
     }
+
+    public function updateCursoUsuario(Request $request)
+    {
+
+       $user = User::where('matricula', $request['matricula'])->first();
+
+        foreach ($request['cursos'] as $cursoId) {
+            UserAlunoVinculo::create([
+                'semestre_letivo' => $this->emVigencia(),
+                'codigo_vinculo' => $this->montaCodigo($cursoId),
+                'user_id' => $user->id
+            ]);
+        }
+
+        if ($user->tipo === 'Aluno') {
+            $user->load('alunoVinculos');
+        }
+
+        return $user;
+    }
 }

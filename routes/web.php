@@ -41,6 +41,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
         $router->put('{id}', 'UserController@update');
         $router->delete('{id}', 'UserController@destroy');
         $router->post('checasenha/', 'UserController@checarSenha');
+        $router->post('updatecursousuario/', 'UserController@updateCursoUsuario');
     });
 
 
@@ -86,5 +87,13 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
     // turma
     $router->group(['prefix' => 'turma'], function () use ($router) {
         $router->get('{codigo}', 'TurmaController@retornaObjetoCursoPeriodoTurnoTurma');
+    });
+
+    // Atendimento
+    $router->group(['prefix' => 'atendimento'], function () use ($router) {
+        $router->get('', 'UserAtendimentoController@index');
+        $router->post('/pesquisa', 'UserAtendimentoController@pesquisa');
+        $router->post('/', 'UserAtendimentoController@store');
+        $router->post('/resolve', 'UserAtendimentoController@resolve');
     });
 });
