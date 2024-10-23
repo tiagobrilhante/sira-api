@@ -95,5 +95,6 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
         $router->post('/pesquisa', 'UserAtendimentoController@pesquisa');
         $router->post('/', 'UserAtendimentoController@store');
         $router->post('/resolve', 'UserAtendimentoController@resolve');
+        $router->get('/meusatendimentos/{tipo}', 'UserAtendimentoController@buscaAtendimentosAluno');
     });
 });

@@ -72,7 +72,7 @@ class UserAtendimentoController extends Controller
         $periodo = str_pad($curso['periodo'], 2, '0', STR_PAD_LEFT);
         $turno = $curso['turno']['identificador_horario'];
 
-        $arrayLetras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','X','W','Y','Z'];
+        $arrayLetras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'W', 'Y', 'Z'];
 
         $turmaIndex = ($curso['turma'] ?? 1) - 1; // Default to 1 if 'turma' is not set
         $letra = $arrayLetras[$turmaIndex] ?? 'A'; // Use 'A' if index is out of bounds
@@ -106,7 +106,7 @@ class UserAtendimentoController extends Controller
             UserAtendimento::create([
                 'descricao' => $descricao,
                 'periodo_letivo' => $periodo_letivo,
-                'codigo_geral'=>$turmaCursoGroup['geral'],
+                'codigo_geral' => $turmaCursoGroup['geral'],
                 'status' => 'Aberto',
                 'data_solicitacao' => $this->convertToDateTime($data),
                 'data_solucao' => null,
@@ -138,7 +138,8 @@ class UserAtendimentoController extends Controller
         return $dateTime;
     }
 
-    private function getCurrentDateTime() {
+    private function getCurrentDateTime()
+    {
         // Create a new DateTime object with the current date and time
         $dateTime = new DateTime();
 
@@ -148,7 +149,7 @@ class UserAtendimentoController extends Controller
 
     public function index()
     {
-        return UserAtendimento::all()->load( 'aluno', 'curso');
+        return UserAtendimento::all()->load('aluno', 'curso');
     }
 
     public function pesquisa(Request $request)
@@ -195,11 +196,18 @@ class UserAtendimentoController extends Controller
             'intervencao_outros' => null,
             'user_atendimento_id' => $atendimento->id,
             'user_id' => Auth::user()->id,
-            'designado_id'=>null
+            'designado_id' => null
         ]);
 
 
-        return $atendimento->load('userAtendimentoResolucao.responsavel');
+        return $atendimento->load('aluno', 'curso','userAtendimentoResolucao.responsavel');
+    }
+
+    public function buscaAtendimentosAluno($tipo)
+    {
+        $user = Auth::user();
+        return UserAtendimento::where('user_id', $user->id)->where('status', $tipo)->get()->load('aluno', 'curso','userAtendimentoResolucao.responsavel');
+
     }
 
 }
