@@ -97,4 +97,11 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
         $router->post('/resolve', 'UserAtendimentoController@resolve');
         $router->get('/meusatendimentos/{tipo}', 'UserAtendimentoController@buscaAtendimentosAluno');
     });
+
+    // relatorios
+    $router->group(['prefix' => 'relatorios'], function () use ($router) {
+        $router->get('/vigencias', 'RelatorioController@retornaVigencia');
+        $router->get('/cursosvigentes/{vigencia}', 'RelatorioController@retornaCursosComVigencia');
+        $router->post('/pegarelatoriovigencia', 'RelatorioController@geraRelatorioVigencia');
+    });
 });
