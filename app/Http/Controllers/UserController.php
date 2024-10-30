@@ -21,9 +21,18 @@ class UserController extends Controller
     }
 
     //lista os usuários para administracão
-    public function indexAdm()
+    public function indexAdm($tipo)
     {
-        return User::where('tipo', '!=', 'Aluno')->get()->load('cursos.curso');
+        if ($tipo === 'Todos') {
+            return User::where('tipo', '!=', 'Aluno')->get()->load('cursos.curso.unidade');
+        } else {
+            return User::where('tipo', '!=', 'Aluno')
+                ->whereHas('cursos.curso', function ($query) use ($tipo) {
+                    $query->where('unidade_id', $tipo);
+                })
+                ->get()
+                ->load('cursos.curso.unidade');
+        }
     }
 
     // retorna se o usuário pode ou não usar a matricula ao se cadastrar / editar
@@ -81,15 +90,15 @@ class UserController extends Controller
 
         if ($request['tipo'] === 'Administrador' && is_array($request['cursos'])) {
             // Recebe um array de IDs de cursos
-            foreach ($request['cursos'] as $cursoId) {
+            foreach ($request['cursos'] as $curso) {
                 UserCurso::create([
-                    'curso_id' => $cursoId,
+                    'curso_id' => $curso['id'],
                     'user_id' => $user->id
                 ]);
             }
         }
 
-        return $user->load('cursos.cursos');
+        return $user->load('cursos.curso.unidade');
     }
 
     // altera um usuário
@@ -113,15 +122,15 @@ class UserController extends Controller
             // Sync the cursos relationship
             $user->cursos()->delete();
 
-            foreach ($request['cursos'] as $cursoId) {
+            foreach ($request['cursos'] as $curso) {
                 UserCurso::create([
-                    'curso_id' => $cursoId,
+                    'curso_id' => $curso['id'],
                     'user_id' => $user->id
                 ]);
             }
         }
 
-        return $user->load('cursos.curso');
+        return $user->load('cursos.curso.unidade');
     }
 
     // remove um usuário

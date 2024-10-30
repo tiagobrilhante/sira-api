@@ -33,7 +33,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
     // USUARIOS
     $router->group(['prefix' => 'users'], function () use ($router) {
         $router->get('', 'UserController@index');
-        $router->get('/adm', 'UserController@indexAdm');
+        $router->get('/adm/{tipo}', 'UserController@indexAdm');
         $router->post('/password/reset', 'UserController@alteraSenhaResetada');
         $router->post('/password/change', 'UserController@alteraSenhaNormal');
         $router->post('', 'UserController@createUser');
