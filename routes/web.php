@@ -104,4 +104,15 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
         $router->get('/cursosvigentes/{vigencia}', 'RelatorioController@retornaCursosComVigencia');
         $router->post('/pegarelatoriovigencia', 'RelatorioController@geraRelatorioVigencia');
     });
+
+    // estatísticas
+    $router->group(['prefix' => 'estatisticas'], function () use ($router) {
+        $router->get('', 'EstatisticaController@index');
+        $router->get('/coordenadorgeral/{id}', 'EstatisticaController@coordenadorGeral');
+        $router->post('/coordenadorperiodo', 'EstatisticaController@coordenadorPorPeriodo');
+        $router->get('/unidadegeral/{id}', 'EstatisticaController@unidadeGeral');
+        $router->post('/unidadeperiodo', 'EstatisticaController@unidadePorPeriodo');
+        $router->get('/cursogeral/{id}', 'EstatisticaController@cursoGeral');
+        $router->post('/cursoperiodo', 'EstatisticaController@cursoPorPeriodo');
+    });
 });

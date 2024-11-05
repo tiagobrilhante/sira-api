@@ -19,7 +19,7 @@ class UserAtendimentoResolucao extends Model
 
     public function userAtendimento()
     {
-        return $this->belongsTo(User::class,  'user_atendimento_id');
+        return $this->belongsTo(UserAtendimento::class,  'user_atendimento_id');
     }
 
     public function responsavel()
