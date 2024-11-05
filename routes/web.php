@@ -42,6 +42,9 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
         $router->delete('{id}', 'UserController@destroy');
         $router->post('checasenha/', 'UserController@checarSenha');
         $router->post('updatecursousuario/', 'UserController@updateCursoUsuario');
+        $router->put('checamatricula/{id}', 'UserController@checaMatriculaExist');
+        $router->put('checaemail/{id}', 'UserController@checaEmailExist');
+        $router->put('editaaluno/{id}', 'UserController@editaAluno');
     });
 
 

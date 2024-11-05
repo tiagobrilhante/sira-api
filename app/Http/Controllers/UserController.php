@@ -175,6 +175,28 @@ class UserController extends Controller
         return $mensagemRetorno;
     }
 
+    public function checaEmailExist(Request $request, $id)
+    {
+
+        $mensagemRetorno = '';
+        if ($id === 'undefined') {
+            // Busca por outro usuário com o mesmo EMAIL, excluindo o próprio usuário
+            $usuarioComMesmoEmail = User::where('email', $request['email'])->first();
+        } else {
+            $meuUser = User::find($id);
+            // Busca por outro usuário com o mesmo email, excluindo o próprio usuário
+            $usuarioComMesmoEmail = User::where('email', $request['email'])
+                ->where('id', '<>', $id)
+                ->first();
+        }
+
+        if ($usuarioComMesmoEmail) {
+            $mensagemRetorno = 'Email já registrado por outro usuário.';
+        }
+
+        return $mensagemRetorno;
+    }
+
 
     public function checarSenha(Request $request)
     {
@@ -260,7 +282,7 @@ class UserController extends Controller
         $periodo = str_pad($curso['periodo'], 2, '0', STR_PAD_LEFT);
         $turno = $curso['turno']['identificador_horario'];
 
-        $arrayLetras = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','X','W','Y','Z'];
+        $arrayLetras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'W', 'Y', 'Z'];
 
         $turmaIndex = ($curso['turma'] ?? 1) - 1; // Default to 1 if 'turma' is not set
         $letra = $arrayLetras[$turmaIndex] ?? 'A'; // Use 'A' if index is out of bounds
@@ -282,7 +304,7 @@ class UserController extends Controller
     public function updateCursoUsuario(Request $request)
     {
 
-       $user = User::where('matricula', $request['matricula'])->first();
+        $user = User::where('matricula', $request['matricula'])->first();
 
         foreach ($request['cursos'] as $cursoId) {
             UserAlunoVinculo::create([
@@ -297,5 +319,19 @@ class UserController extends Controller
         }
 
         return $user;
+    }
+
+    public function editaAluno(Request $request, $id)
+    {
+
+        $aluno = User::find($id)->load('alunoVinculos');
+
+        $aluno->nome = $request['nome'];
+        $aluno->telefone = $request['telefone'];
+        $aluno->email = $request['email'];
+        $aluno->matricula = $request['matricula'];
+        $aluno->save();
+
+        return $aluno;
     }
 }
