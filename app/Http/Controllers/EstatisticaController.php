@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserAtendimento;
 use App\Models\UserAtendimentoResolucao;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 class EstatisticaController extends Controller
@@ -17,40 +18,73 @@ class EstatisticaController extends Controller
     public function index()
     {
 
-        $quantidadeAtendimentosCriados = UserAtendimento::all()->count();
-        $quantidadeAtendimentosDeferidos = UserAtendimento::where('status', 'Deferido')->count();
-        $quantidadeAtendimentosIndeferidos = UserAtendimento::where('status', 'Indeferido')->count();
-        $quantidadeAtendimentosEmAberto = UserAtendimento::where('status', 'Aberto')->count();
-        $quantidadeAtendimentosResolvidos = $quantidadeAtendimentosIndeferidos + $quantidadeAtendimentosDeferidos;
-        $semestresLetivos = SemestreLetivo::all();
+        if (Auth::user()->tipo === 'Administrador Geral') {
+            $quantidadeAtendimentosCriados = UserAtendimento::all()->count();
+            $quantidadeAtendimentosDeferidos = UserAtendimento::where('status', 'Deferido')->count();
+            $quantidadeAtendimentosIndeferidos = UserAtendimento::where('status', 'Indeferido')->count();
+            $quantidadeAtendimentosEmAberto = UserAtendimento::where('status', 'Aberto')->count();
+            $quantidadeAtendimentosResolvidos = $quantidadeAtendimentosIndeferidos + $quantidadeAtendimentosDeferidos;
+            $semestresLetivos = SemestreLetivo::all();
 
-        $arrayDeCodigos = [];
-        foreach ($semestresLetivos as $semestreLetivo) {
-            $arrayDeCodigos[] = $semestreLetivo->codigo;
+            $arrayDeCodigos = [];
+            foreach ($semestresLetivos as $semestreLetivo) {
+                $arrayDeCodigos[] = $semestreLetivo->codigo;
+            }
+            $arrayDeCodigos = array_unique($arrayDeCodigos);
+            $quantidadeSemestresLetivos = count($arrayDeCodigos);
+
+            $unidades = Unidade::all();
+            $cursos = Curso::all()->load('unidade');
+            $coordenadores = User::whereIn('tipo', ['Administrador', 'Administrador Geral'])->get();
+            $qtdAlunos = User::where('tipo', 'Aluno')->count();
+
+
+            $retorno = new \stdClass();
+            $retorno->qtdatendimentoscriados = $quantidadeAtendimentosCriados;
+            $retorno->qtdatendimentosresolvidos = $quantidadeAtendimentosResolvidos;
+            $retorno->qtdatendimentosdeferidos = $quantidadeAtendimentosDeferidos;
+            $retorno->qtdatendimentosindeferidos = $quantidadeAtendimentosIndeferidos;
+            $retorno->qtdatendimentosemaberto = $quantidadeAtendimentosEmAberto;
+            $retorno->unidades = $unidades;
+            $retorno->cursos = $cursos;
+            $retorno->coordenadores = $coordenadores;
+            $retorno->qtdalunos = $qtdAlunos;
+            $retorno->qtdperiodos = $quantidadeSemestresLetivos;
+
+
+            return response()->json($retorno);
         }
-        $arrayDeCodigos = array_unique($arrayDeCodigos);
-        $quantidadeSemestresLetivos = count($arrayDeCodigos);
 
-        $unidades = Unidade::all();
-        $cursos = Curso::all()->load('unidade');
-        $coordenadores = User::whereIn('tipo', ['Administrador', 'Administrador Geral'])->get();
-        $qtdAlunos = User::where('tipo', 'Aluno')->count();
+        if (Auth::user()->tipo === 'Administrador') {
 
+            $cursos = Auth::user()->cursos;
+            $arrayIdCurso = [];
+            foreach ($cursos as $curso) {
+                array_push($arrayIdCurso, $curso->curso_id);
+            }
 
-        $retorno = new \stdClass();
-        $retorno->qtdatendimentoscriados = $quantidadeAtendimentosCriados;
-        $retorno->qtdatendimentosresolvidos = $quantidadeAtendimentosResolvidos;
-        $retorno->qtdatendimentosdeferidos = $quantidadeAtendimentosDeferidos;
-        $retorno->qtdatendimentosindeferidos = $quantidadeAtendimentosIndeferidos;
-        $retorno->qtdatendimentosemaberto = $quantidadeAtendimentosEmAberto;
-        $retorno->unidades = $unidades;
-        $retorno->cursos = $cursos;
-        $retorno->coordenadores = $coordenadores;
-        $retorno->qtdalunos = $qtdAlunos;
-        $retorno->qtdperiodos = $quantidadeSemestresLetivos;
+            $quantidadeAtendimentosCriados = UserAtendimento::whereIn('curso_id',$arrayIdCurso)->count();
+            $quantidadeAtendimentosDeferidos = UserAtendimento::where('status', 'Deferido')->whereIn('curso_id',$arrayIdCurso)->count();
+            $quantidadeAtendimentosIndeferidos = UserAtendimento::where('status', 'Indeferido')->whereIn('curso_id',$arrayIdCurso)->count();
+            $quantidadeAtendimentosEmAberto = UserAtendimento::where('status', 'Aberto')->whereIn('curso_id',$arrayIdCurso)->count();
+            $quantidadeAtendimentosResolvidos = $quantidadeAtendimentosIndeferidos + $quantidadeAtendimentosDeferidos;
+
+            $cursos = Curso::whereIn('id', $arrayIdCurso)->get()->load('unidade');
+            $coordenadores = [Auth::user()];
 
 
-        return response()->json($retorno);
+            $retorno = new \stdClass();
+            $retorno->qtdatendimentoscriados = $quantidadeAtendimentosCriados;
+            $retorno->qtdatendimentosresolvidos = $quantidadeAtendimentosResolvidos;
+            $retorno->qtdatendimentosdeferidos = $quantidadeAtendimentosDeferidos;
+            $retorno->qtdatendimentosindeferidos = $quantidadeAtendimentosIndeferidos;
+            $retorno->qtdatendimentosemaberto = $quantidadeAtendimentosEmAberto;
+            $retorno->cursos = $cursos;
+            $retorno->coordenadores = $coordenadores;
+
+            return response()->json($retorno);
+        }
+
 
     }
 

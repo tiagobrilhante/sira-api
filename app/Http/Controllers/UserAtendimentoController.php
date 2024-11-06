@@ -154,32 +154,55 @@ class UserAtendimentoController extends Controller
 
     public function pesquisa(Request $request)
     {
-
         $unidade = $request['unidade'];
         $curso = $request['curso'];
         $estado = $request['estado'];
 
-        if ($unidade === 'todos') {
-            return UserAtendimento::where('status', $estado)->get()->load('aluno', 'curso', 'userAtendimentoResolucao.responsavel');
+        if (Auth::user()->tipo === 'Administrador Geral') {
+            if ($unidade === 'todos') {
+                return UserAtendimento::where('status', $estado)->get()->load('aluno', 'curso', 'userAtendimentoResolucao.responsavel');
+            } else {
+                if ($curso === 'todos') {
+                    return UserAtendimento::where('status', $estado)
+                        ->whereHas('curso', function ($query) use ($unidade) {
+                            $query->where('unidade_id', $unidade);
+                        })
+                        ->get()
+                        ->load('aluno', 'curso', 'userAtendimentoResolucao.responsavel');
+
+                } else {
+                    return UserAtendimento::where('status', $estado)
+                        ->whereHas('curso', function ($query) use ($unidade, $curso) {
+                            $query->where('unidade_id', $unidade)
+                                ->where('id', $curso);
+                        })
+                        ->get()
+                        ->load('aluno', 'curso', 'userAtendimentoResolucao.responsavel');
+                }
+            }
         } else {
+
             if ($curso === 'todos') {
+
+                $cursos = Auth::user()->cursos;
+                $arrayIdCurso = [];
+                foreach ($cursos as $curso) {
+                    array_push($arrayIdCurso, $curso->curso_id);
+                }
+
                 return UserAtendimento::where('status', $estado)
-                    ->whereHas('curso', function ($query) use ($unidade) {
-                        $query->where('unidade_id', $unidade);
-                    })
-                    ->get()
+                    ->whereIn('curso_id', $arrayIdCurso )->get()
                     ->load('aluno', 'curso', 'userAtendimentoResolucao.responsavel');
 
             } else {
                 return UserAtendimento::where('status', $estado)
-                    ->whereHas('curso', function ($query) use ($unidade, $curso) {
-                        $query->where('unidade_id', $unidade)
-                            ->where('id', $curso);
-                    })
+                    ->where('curso_id', $curso)
                     ->get()
                     ->load('aluno', 'curso', 'userAtendimentoResolucao.responsavel');
             }
         }
+
+
 
     }
 

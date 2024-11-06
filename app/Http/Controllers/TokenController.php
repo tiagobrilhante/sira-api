@@ -44,7 +44,10 @@ class TokenController extends Controller
 
        if ($user->tipo === 'Aluno') {
            $user->load('alunoVinculos');
-       }
+       } else if ($user->tipo === 'Administrador') {
+            $user->load('cursos.curso.unidade');
+        }
+
 
         return [
             'access_token'=>$token,
