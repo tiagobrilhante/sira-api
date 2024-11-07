@@ -202,4 +202,31 @@ class UnidadeController extends Controller
     }
 
 
+    public function checaCodCursos(Request $request)
+    {
+        $cursos = $request->input('cursos');
+
+        $arrayCursosCod = [];
+        $itensNovos = [];
+
+        foreach ($cursos as $curso) {
+            if (isset($curso['id'])) {
+                $arrayCursosCod[] = $curso['codigo'];
+            } else {
+                $itensNovos[] = $curso['codigo'];
+            }
+        }
+
+        // Check for duplicates
+        $duplicates = array_intersect($arrayCursosCod, $itensNovos);
+
+        if (!empty($duplicates)) {
+            return 'duplicado';
+        } else {
+            return response()->json([
+                'message' => 'Ok'
+            ], 200);
+        }
+    }
+
 }

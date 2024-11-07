@@ -306,6 +306,24 @@ class UserController extends Controller
 
         $user = User::where('matricula', $request['matricula'])->first();
 
+        $arrayCodEnviada = [];
+        foreach ($request['cursos'] as $cursoId) {
+            $arrayCodEnviada[] = $this->montaCodigo($cursoId);
+        }
+
+        $vinculosExistentes = UserAlunoVinculo::where('user_id', $user->id)->where('semestre_letivo', $this->emVigencia())->get();
+
+
+        foreach ($vinculosExistentes as $vinculo) {
+
+            if (in_array($vinculo->codigo_vinculo, $arrayCodEnviada)) {
+                return 'duplicado';
+
+            }
+
+        }
+
+
         foreach ($request['cursos'] as $cursoId) {
             UserAlunoVinculo::create([
                 'semestre_letivo' => $this->emVigencia(),

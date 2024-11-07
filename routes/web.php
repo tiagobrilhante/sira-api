@@ -56,6 +56,7 @@ $router->group(['prefix' => 'api', 'middleware' => 'auth'], function () use ($ro
         $router->get('listasimples', 'UnidadeController@listaSimples');
         $router->get('vigente', 'UnidadeController@vigente');
         $router->delete('{id}', 'UnidadeController@destroy');
+        $router->post('checacodcursos', 'UnidadeController@checaCodCursos');
     });
 
     // curso
